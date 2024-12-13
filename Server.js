@@ -24,18 +24,22 @@ app.use(bodyParser.json());
 // Menyajikan file statis (HTML, CSS, JS) dari folder public
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Setup WhatsApp client
+// Set up the server
+const app = express();
+const server = http.createServer(app);
+const io = socketIo(server);
+
+// Initialize WhatsApp client
 const client = new Client();
 
 client.on('qr', (qr) => {
+    // Emit the QR code to the frontend for rendering
     qrcode.toDataURL(qr, (err, url) => {
         if (err) {
-            console.error("Failed to generate QR code:", err);
+            console.error("Error generating QR Code:", err);
             return;
         }
-        // Kirim QR Code ke frontend menggunakan socket.io
-        io.emit('qrCode', url);
-        console.log('QR RECEIVED');
+        io.emit('qrCode', url); // Emit the QR code data URL
     });
 });
 
