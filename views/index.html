@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WhatsApp Blast</title>
+    <!-- Link Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+    <div class="container">
+        <h2 class="text-center">WhatsApp Blast</h2>
+        <div class="card">
+            <div class="card-header">
+                <strong>QR Code untuk Login</strong>
+            </div>
+            <div class="card-body text-center">
+                <p>Scan QR Code untuk masuk ke WhatsApp Web</p>
+                <div id="qrCodeImage"></div> <!-- QR Code will be inserted here -->
+            </div>
+        </div>
+
+        <form id="blastForm" enctype="multipart/form-data" class="mt-4">
+            <div class="message-templates">
+                <label for="contacts">Upload CSV Kontak:</label>
+                <input type="file" name="contacts" id="contacts" class="form-control mb-3" accept=".csv" required><br>
+
+                <label for="message1">Pesan Template 1:</label>
+                <textarea name="message1" id="message1" class="form-control mb-3" rows="5" placeholder="Masukkan template pesan 1" required></textarea>
+
+                <label for="message2">Pesan Template 2:</label>
+                <textarea name="message2" id="message2" class="form-control mb-3" rows="5" placeholder="Masukkan template pesan 2" required></textarea>
+
+                <label for="message3">Pesan Template 3:</label>
+                <textarea name="message3" id="message3" class="form-control mb-3" rows="5" placeholder="Masukkan template pesan 3" required></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block">Kirim Pesan</button>
+        </form>
+
+        <div class="progress-container mt-4">
+            <h5>Status Pengiriman:</h5>
+            <div class="progress">
+                <div id="progressBar" class="progress-bar" style="width: 0%;"></div>
+            </div>
+            <p>Pesan terkirim: <span id="sentCount">0</span> | Pesan gagal: <span id="failedCount">0</span></p>
+            <button id="stopButton" class="btn" disabled>Hentikan Pengiriman</button>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/script.js"></script>
+</body>
+</html>

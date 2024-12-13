@@ -1,0 +1,31 @@
+{
+  "name": "whatsapp-blast",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "body-parser": "^1.20.3",
+    "csv-parser": "^3.0.0",
+    "ejs": "^3.1.10",
+    "excel4node": "^1.8.2",
+    "express": "^4.21.2",
+    "fs": "^0.0.1-security",
+    "iconv-lite": "^0.6.3",
+    "libphonenumber-js": "^1.11.16",
+    "multer": "^1.4.5-lts.1",
+    "puppeteer": "^19.0.0",
+    "puppeteer-core": "^23.10.4",
+    "qrcode": "^1.5.4",
+    "qrcode-terminal": "^0.12.0",
+    "selenium-webdriver": "^4.27.0",
+    "socket.io": "^4.8.1",
+    "whatsapp-web.js": "^1.26.0",
+    "xlsx": "^0.18.5"
+  }
+}

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WhatsApp Blast</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        .container { max-width: 800px; margin: 0 auto; padding: 20px; }
+        .logs { height: 300px; overflow-y: auto; border: 1px solid #ddd; margin-top: 20px; padding: 10px; background-color: #f9f9f9; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>WhatsApp Blast Tool</h1>
+
+        <form id="uploadForm" action="/upload-csv" method="post" enctype="multipart/form-data">
+            <label for="csvFile">Upload CSV File:</label>
+            <input type="file" id="csvFile" name="csvFile" accept=".csv" required>
+            
+            <h3>Masukkan 3 Template Pesan:</h3>
+            <textarea id="template1" placeholder="Template 1" required></textarea><br><br>
+            <textarea id="template2" placeholder="Template 2" required></textarea><br><br>
+            <textarea id="template3" placeholder="Template 3" required></textarea><br><br>
+            
+            <button type="submit">Mulai Pengiriman</button>
+        </form>
+
+        <div class="logs" id="logs">
+            <h4>Logs:</h4>
+            <div id="logOutput"></div>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+
+        // Mengirim log ke tampilan
+        socket.on('log', (message) => {
+            const logOutput = document.getElementById('logOutput');
+            logOutput.innerHTML += `<p>${message}</p>`;
+            logOutput.scrollTop = logOutput.scrollHeight;
+        });
+
+        // Mengirim QR code ke tampilan
+        socket.on('qr', (qr) => {
+            const logOutput = document.getElementById('logOutput');
+            logOutput.innerHTML += `<p>QR Code: ${qr}</p>`;
+        });
+
+        // Mengirim pesan bahwa WhatsApp siap
+        socket.on('ready', (message) => {
+            const logOutput = document.getElementById('logOutput');
+            logOutput.innerHTML += `<p>${message}</p>`;
+        });
+
+        document.getElementById('uploadForm').onsubmit = async function (e) {
+            e.preventDefault();
+
+            const formData = new FormData();
+            formData.append('csvFile', document.getElementById('csvFile').files[0]);
+            formData.append('messageTemplates', [
+                document.getElementById('template1').value,
+                document.getElementById('template2').value,
+                document.getElementById('template3').value
+            ]);
+
+            const response = await fetch('/upload-csv', {
+                method: 'POST',
+                body: formData,
+            });
+
+            const result = await response.text();
+            console.log(result);
+        };
+    </script>
+</body>
+</html>
