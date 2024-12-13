@@ -14,8 +14,8 @@
 <body>
     <div class="container">
         <h1>WhatsApp Blast Tool</h1>
-        
-        <!-- Form to upload CSV and message templates -->
+
+        <!-- Form untuk upload CSV dan template pesan -->
         <form id="uploadForm" action="/upload-csv" method="post" enctype="multipart/form-data">
             <label for="csvFile">Upload CSV File:</label>
             <input type="file" id="csvFile" name="csvFile" accept=".csv" required><br><br>
@@ -45,7 +45,7 @@
     <script>
         const socket = io();
 
-        // Display QR code
+        // Menampilkan QR code
         socket.on('qr', (qr) => {
             const qrCodeCanvas = document.getElementById('qrCodeCanvas');
             const qrStatus = document.getElementById('qrStatus');
@@ -59,14 +59,14 @@
             qrStatus.textContent = 'Scan QR Code to log in.';
         });
 
-        // Display logs from server
+        // Menampilkan logs dari server
         socket.on('log', (message) => {
             const logOutput = document.getElementById('logOutput');
             logOutput.innerHTML += `<p>${message}</p>`;
             logOutput.scrollTop = logOutput.scrollHeight;
         });
 
-        // Handle form submission for CSV upload and templates
+        // Menangani form submission untuk upload CSV dan templates
         document.getElementById('uploadForm').onsubmit = async function (e) {
             e.preventDefault();
 
