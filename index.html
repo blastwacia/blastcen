@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WhatsApp Blast</title>
+    <script src="https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"></script>  <!-- QRCode.js library -->
     <style>
         body { font-family: Arial, sans-serif; }
         .container { max-width: 800px; margin: 0 auto; padding: 20px; }
@@ -13,10 +14,11 @@
 <body>
     <div class="container">
         <h1>WhatsApp Blast Tool</h1>
-
+        
+        <!-- Form to upload CSV and message templates -->
         <form id="uploadForm" action="/upload-csv" method="post" enctype="multipart/form-data">
             <label for="csvFile">Upload CSV File:</label>
-            <input type="file" id="csvFile" name="csvFile" accept=".csv" required>
+            <input type="file" id="csvFile" name="csvFile" accept=".csv" required><br><br>
             
             <h3>Masukkan 3 Template Pesan:</h3>
             <textarea id="template1" placeholder="Template 1" required></textarea><br><br>
@@ -26,6 +28,13 @@
             <button type="submit">Mulai Pengiriman</button>
         </form>
 
+        <!-- Display QR code -->
+        <div id="qrCodeContainer">
+            <canvas id="qrCodeCanvas"></canvas>
+            <p id="qrStatus"></p>
+        </div>
+
+        <!-- Logs section -->
         <div class="logs" id="logs">
             <h4>Logs:</h4>
             <div id="logOutput"></div>
@@ -36,26 +45,28 @@
     <script>
         const socket = io();
 
-        // Mengirim log ke tampilan
-         socket.on('qrCode', (url) => {
+        // Display QR code
+        socket.on('qr', (qr) => {
             const qrCodeCanvas = document.getElementById('qrCodeCanvas');
             const qrStatus = document.getElementById('qrStatus');
-            qrCodeCanvas.innerHTML = `<img src="${url}" alt="QR Code"/>`;
-            qrStatus.textContent = 'Scan the QR Code to log in.';
-        });
-    </script>
-        // Mengirim QR code ke tampilan
-        socket.on('qr', (qr) => {
-            const logOutput = document.getElementById('logOutput');
-            logOutput.innerHTML += `<p>QR Code: ${qr}</p>`;
+            new QRCode(qrCodeCanvas, {
+                text: qr,
+                width: 128,
+                height: 128,
+                colorDark: "#000000",
+                colorLight: "#ffffff",
+            });
+            qrStatus.textContent = 'Scan QR Code to log in.';
         });
 
-        // Mengirim pesan bahwa WhatsApp siap
-        socket.on('ready', (message) => {
+        // Display logs from server
+        socket.on('log', (message) => {
             const logOutput = document.getElementById('logOutput');
             logOutput.innerHTML += `<p>${message}</p>`;
+            logOutput.scrollTop = logOutput.scrollHeight;
         });
 
+        // Handle form submission for CSV upload and templates
         document.getElementById('uploadForm').onsubmit = async function (e) {
             e.preventDefault();
 
