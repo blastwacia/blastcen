@@ -37,12 +37,13 @@
         const socket = io();
 
         // Mengirim log ke tampilan
-        socket.on('log', (message) => {
-            const logOutput = document.getElementById('logOutput');
-            logOutput.innerHTML += `<p>${message}</p>`;
-            logOutput.scrollTop = logOutput.scrollHeight;
+         socket.on('qrCode', (url) => {
+            const qrCodeCanvas = document.getElementById('qrCodeCanvas');
+            const qrStatus = document.getElementById('qrStatus');
+            qrCodeCanvas.innerHTML = `<img src="${url}" alt="QR Code"/>`;
+            qrStatus.textContent = 'Scan the QR Code to log in.';
         });
-
+    </script>
         // Mengirim QR code ke tampilan
         socket.on('qr', (qr) => {
             const logOutput = document.getElementById('logOutput');
