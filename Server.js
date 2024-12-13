@@ -1,14 +1,12 @@
 const express = require('express');
 const multer = require('multer');
 const fs = require('fs');
-const csvParser = require('csv-parser');
 const { Client } = require('whatsapp-web.js');
 const bodyParser = require('body-parser');
-const qrcode = require('qrcode');  // Untuk menghasilkan QR Code
-const iconv = require('iconv-lite');  // Menangani masalah encoding
 const http = require('http');
-const socketIo = require('socket.io'); // Menambahkan Socket.io
+const socketIo = require('socket.io'); 
 const path = require('path');
+const qrcode = require('qrcode');  // Untuk menghasilkan QR Code
 
 // Setup Express dan HTTP server
 const app = express();
@@ -20,30 +18,25 @@ const port = 4000;
 // Middleware
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+app.use(express.static(path.join(__dirname, 'public')));  // Untuk menyajikan HTML dan file statis
 
-// Menyajikan file statis (HTML, CSS, JS) dari folder public
-app.use(express.static(path.join(__dirname, 'public')));
-
-// Set up the server
-const app = express();
-const server = http.createServer(app);
-const io = socketIo(server);
-
-// Initialize WhatsApp client
+// Setup WhatsApp client
 const client = new Client();
 
 client.on('qr', (qr) => {
-    // Emit the QR code to the frontend for rendering
+    // Kirim QR Code ke frontend menggunakan socket.io
     qrcode.toDataURL(qr, (err, url) => {
         if (err) {
-            console.error("Error generating QR Code:", err);
+            console.error("Failed to generate QR code:", err);
             return;
         }
-        io.emit('qrCode', url); // Emit the QR code data URL
+        io.emit('qr', url);
+        console.log('QR RECEIVED');
     });
 });
 
 client.on('ready', () => {
+    io.emit('log', 'WhatsApp is ready!');
     console.log('WhatsApp is ready!');
 });
 
@@ -67,79 +60,22 @@ app.get('/', (req, res) => {
 });
 
 // Route untuk menangani upload file CSV dan template pesan
-app.post('/upload', upload.single('contacts'), (req, res) => {
+app.post('/upload-csv', upload.single('csvFile'), (req, res) => {
+    const { messageTemplates } = req.body;
     const filePath = req.file.path;
-    const { message1, message2, message3 } = req.body;
 
-    // Validasi pesan
-    if (!message1 || !message2 || !message3 || message1.trim() === '' || message2.trim() === '' || message3.trim() === '') {
-        return res.status(400).send('Semua pesan template harus diisi.');
+    if (!messageTemplates || messageTemplates.length < 3) {
+        return res.status(400).send('Template pesan tidak lengkap.');
     }
 
     console.log('File uploaded:', filePath);
-    console.log('Message Templates:', message1, message2, message3);
+    console.log('Message Templates:', messageTemplates);
 
-    // Baca file CSV untuk kontak
-    let contacts = [];
-    fs.createReadStream(filePath)
-        .pipe(iconv.decodeStream('utf-8'))
-        .pipe(csvParser({ skipEmptyLines: true, trim: true }))
-        .on('headers', (headers) => {
-            const cleanedHeaders = headers.map(header => header.normalize().trim());
-            console.log("Headers setelah dibersihkan:", cleanedHeaders);
-        })
-        .on('data', (row) => {
-            const userName = row['USER ID']?.normalize().trim();
-            const phoneNumber = row['NO HANDPHONE']?.normalize().trim();
+    // Lakukan proses pengiriman pesan (menggunakan WhatsApp API atau lainnya)
+    // ...
 
-            if (userName && phoneNumber) {
-                contacts.push(row);
-            }
-        })
-        .on('end', () => {
-            console.log('CSV file successfully processed');
-            sendMessages(contacts, [message1, message2, message3], res);
-        });
+    res.send('File CSV berhasil diproses!');
 });
-
-// Fungsi untuk mengirim pesan ke kontak
-async function sendMessages(contacts, messages, res) {
-    let sentCount = 0;
-    let failedCount = 0;
-
-    for (const contact of contacts) {
-        const phoneNumber = contact['NO HANDPHONE'];
-        const userName = contact['USER ID'];
-
-        if (phoneNumber && userName) {
-            const formattedNumber = phoneNumber.startsWith('+') 
-                ? phoneNumber.replace('+', '') 
-                : phoneNumber;
-
-            const whatsappNumber = `${formattedNumber}@c.us`;
-            
-            try {
-                const randomMessage = messages[Math.floor(Math.random() * messages.length)];
-                const personalizedMessage = randomMessage.replace(/{USER_ID}/g, userName);
-                await client.sendMessage(whatsappNumber, personalizedMessage);
-                console.log(`Pesan terkirim ke ${userName} (${phoneNumber})`);
-                sentCount++;
-            } catch (error) {
-                console.error(`Gagal mengirim pesan ke ${userName} (${phoneNumber}):`, error);
-                failedCount++;
-            }
-
-            // Kirim progres pengiriman pesan ke frontend menggunakan socket.io
-            io.emit('progress', { sent: sentCount, failed: failedCount });
-
-            // Jeda acak antara 60 hingga 300 detik
-            const randomDelay = Math.floor(Math.random() * (300 - 60 + 1)) + 60;
-            await new Promise(resolve => setTimeout(resolve, randomDelay * 1000));
-        }
-    }
-
-    res.send('Pesan berhasil dikirim ke semua kontak.');
-}
 
 // Menjalankan server
 server.listen(port, () => {
