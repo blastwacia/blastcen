@@ -1,15 +1,17 @@
-// Generate QR Code
-const qrCodeCanvas = document.getElementById('qrCodeCanvas');
-const qrStatus = document.getElementById('qrStatus');
-const qrData = "WhatsApp Login Data"; // Replace this with dynamic data if needed
+// Frontend (browser-side)
+window.addEventListener('load', function () {
+    const qrCodeCanvas = document.getElementById('qrCodeCanvas');
+    const qrStatus = document.getElementById('qrStatus');
 
-QRCode.toCanvas(qrCodeCanvas, qrData, function (error) {
-    if (error) {
-        console.error('Error generating QR Code:', error);
-        qrStatus.textContent = 'Gagal membuat QR Code.';
-    } else {
-        qrStatus.textContent = 'Silakan scan QR Code untuk login.';
-    }
+    // Generate QR code here using QRCode.js
+    QRCode.toCanvas(qrCodeCanvas, 'Your QR Code Data', function (error) {
+        if (error) {
+            console.error('Error generating QR Code:', error);
+            qrStatus.textContent = 'Failed to generate QR Code.';
+        } else {
+            qrStatus.textContent = 'Scan QR Code to log in.';
+        }
+    });
 });
 
 // Save Template
